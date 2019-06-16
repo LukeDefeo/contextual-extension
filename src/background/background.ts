@@ -1,11 +1,13 @@
 import {Context} from "./model";
-import {curry, invertObj, map, partial} from "ramda";
+import {append, assoc, curry, equals, invertObj, map, partial, prepend, uniq} from "ramda";
 import Tab = chrome.tabs.Tab;
 import Window = chrome.windows.Window;
-import  'chrome-extension-async'
+import 'chrome-extension-async'
+
 require("chrome-extension-async")
 // import "chrome-extension-async";
 import {contextForUri} from "./domain";
+import reject from "ramda/es/reject";
 
 console.log(`Back ground page initialised ${new Date().toISOString()}`)
 
@@ -19,8 +21,12 @@ let contexts: Context[] = [{
   rules: [["reddit.com"], ["stack driver"]]
 }]
 
+//these values are mutated
+
 let contextIdToWindowIdMapping: { [contextId: number]: number } = []
-//maybe window state could have a pointer to the actual context?
+//this is for the popup to present the windows/ contexts the the order they have been switched to by the user
+let windowIdFocusOrder: number[] = []
+//maybe window state could have a pointer to the actual context... the context can change independantly of this data, its better to think of them relationally
 
 
 // Listen to messages sent from other parts of the extension.
@@ -46,31 +52,28 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
     if (info.status === 'loading') {
       console.log('tab is "loading" ... not moving')
     } else {
-      await moveTabToContext(tab,context.id)
+      await moveTabToContext(tab, context.id)
     }
   }
 })
 
 chrome.windows.onRemoved.addListener((windowId) => {
 
+  // remove from mapping
   const windowIdToContextIdMapping = invertObj(contextIdToWindowIdMapping)
   const contextId = windowIdToContextIdMapping[windowId]
   console.log(`window ${windowId} closed, dissoc'ing context ${contextId}`)
   delete contextIdToWindowIdMapping[contextId]
+
+  //update window id focus order
+  windowIdFocusOrder = reject(curry(equals(windowId)), windowIdFocusOrder)
+  console.log(`new windows focused`, windowIdFocusOrder)
 })
 
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
-
+  windowIdFocusOrder = uniq(prepend(windowId, windowIdFocusOrder))
+  console.log(`new windows focused`, windowIdFocusOrder)
 })
-
-
-const testAsync: (param: string) => Promise<Tab[]> = async (param: string) => {
-  console.log(`pre ${param}`)
-  const tabs: Tab[] = await chrome.tabs.query({active: true, currentWindow: true});
-  console.log(`post ${param}`)
-  console.log(tabs)
-  return tabs
-}
 
 async function createWindowWithTab(contextId: number, tabId: number): Promise<void> {
 
@@ -87,7 +90,7 @@ async function createWindowWithTab(contextId: number, tabId: number): Promise<vo
 async function windowForContextId(contextId: number): Promise<Window> {
   const windowId = contextIdToWindowIdMapping[contextId]
   if (windowId) {
-    return await chrome.windows.get(windowId,{})
+    return await chrome.windows.get(windowId, {})
   } else {
     return Promise.resolve(null)
   }
