@@ -1,25 +1,32 @@
 import * as React from 'react';
 import './Popup.scss';
+import {MessageType, PopUpItem} from "../background/model";
 
-interface AppProps {}
+interface AppProps {
+}
 
-interface AppState {}
+interface PopupState {
+  items: PopUpItem[]
+}
 
-export default class Popup extends React.Component<AppProps, AppState> {
-    constructor(props: AppProps, state: AppState) {
-        super(props, state);
-    }
+export default class Popup extends React.Component<AppProps, PopupState> {
+  constructor(props: AppProps, state: PopupState) {
+    super(props, state);
+    this.state = {items: []}
+  }
 
-    componentDidMount() {
-        // Example of how to send a message to eventPage.ts.
-        chrome.runtime.sendMessage({ popupMounted: true });
-    }
+  componentDidMount() {
+    chrome.runtime.sendMessage({type: 'RequestPopupState'}, (response: PopUpItem[]) => {
+      this.setState({items: response})
+    })
+  }
 
-    render() {
-        return (
-            <div className="popupContainer">
-                Hello, world 2!
-            </div>
-        )
-    }
+  render() {
+    return (
+      <div className="popupContainer">
+        Hello world
+        ${JSON.stringify(this.state.items)}
+      </div>
+    )
+  }
 }

@@ -13,3 +13,8 @@ export interface PopUpItem {
 
 export type ContextWindowMapping = { [contextId: number]: number }
 export type WindowContextMapping = { [contextId: number]: number }
+
+
+export type MessageRequestType = 'RequestPopupState'
+
+// export type MessageType = 'RequestPopupState' | 'SendPopupState'

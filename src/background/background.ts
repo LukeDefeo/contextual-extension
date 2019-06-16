@@ -1,4 +1,4 @@
-import {Context, ContextWindowMapping} from "./model";
+import {Context, ContextWindowMapping, MessageRequestType} from "./model";
 import {append, assoc, curry, equals, invertObj, map, partial, prepend, uniq} from "ramda";
 import Tab = chrome.tabs.Tab;
 import Window = chrome.windows.Window;
@@ -6,7 +6,7 @@ import 'chrome-extension-async'
 
 require("chrome-extension-async")
 // import "chrome-extension-async";
-import {contextForUri} from "./domain";
+import {contextForUri, createPopupState} from "./domain";
 import reject from "ramda/es/reject";
 
 console.log(`Back ground page initialised ${new Date().toISOString()}`)
@@ -29,8 +29,30 @@ let windowIdFocusOrder: number[] = []
 //maybe window state could have a pointer to the actual context... the context can change independantly of this data, its better to think of them relationally
 
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+  const msgType: MessageRequestType = message.type
+  if (msgType === 'RequestPopupState') {
+    sendResponse(createPopupState(windowIdFocusOrder, contextIdToWindowIdMapping, contexts))
+  } else {
+    console.log(`Unknown message from sender ${sender.id} `, message)
+  }
+});
+
+
 // Listen to messages sent from other parts of the extension.
+
+chrome.runtime.onConnect.addListener(port => {
+
+  port.onMessage.addListener(function (msg) {
+    console.log("message recieved" + msg);
+    port.postMessage("Hi Popup.js");
+  });
+})
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+
+
+  console.log(`Got message from ${sender}`)
   // onMessage must return "true" if response is async.
   let isResponseAsync = false;
 
@@ -74,7 +96,6 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
   windowIdFocusOrder = uniq(prepend(windowId, windowIdFocusOrder))
   console.log(`new windows focused`, windowIdFocusOrder)
 })
-
 
 
 async function createWindowWithTab(contextId: number, tabId: number): Promise<void> {
