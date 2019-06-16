@@ -22,8 +22,8 @@ let contexts: Context[] = [{
 }]
 
 //these values are mutated
-
 let contextIdToWindowIdMapping: ContextWindowMapping = []
+
 //this is for the popup to present the windows/ contexts the the order they have been switched to by the user
 let windowIdFocusOrder: number[] = []
 
@@ -48,30 +48,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else {
     console.log(`Unknown message from sender ${sender.id} `, message)
   }
-});
-
-
-// Listen to messages sent from other parts of the extension.
-
-chrome.runtime.onConnect.addListener(port => {
-
-  port.onMessage.addListener(function (msg) {
-    console.log("message recieved" + msg);
-    port.postMessage("Hi Popup.js");
-  });
-})
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-
-
-  console.log(`Got message from ${sender}`)
-  // onMessage must return "true" if response is async.
-  let isResponseAsync = false;
-
-  if (request.popupMounted) {
-    console.log('eventPage notified that Popup.tsx has mounted.');
-  }
-
-  return isResponseAsync;
 });
 
 
