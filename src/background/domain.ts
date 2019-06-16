@@ -18,9 +18,9 @@ import {
   partial,
   head,
   tap,
-  last, propOr, find, propEq, or, defaultTo
+  last, propOr, find, propEq, or, defaultTo, invertObj
 } from "ramda";
-import {Context, PopUpItem, WindowContextMapping} from "./model";
+import {Context, ContextWindowMapping, PopUpItem, WindowContextMapping} from "./model";
 import {pipeline} from "stream";
 import {isNullOrUndefined} from "util";
 

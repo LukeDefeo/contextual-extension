@@ -1,5 +1,5 @@
-import {Context, ContextWindowMapping, MessageRequestType} from "./model";
-import {append, assoc, curry, equals, invertObj, map, partial, prepend, uniq} from "ramda";
+import {Context, ContextWindowMapping, MessageRequestType, WindowContextMapping} from "./model";
+import {append, assoc, curry, equals, fromPairs, invertObj, map, partial, pipe, prepend, toPairs, uniq} from "ramda";
 import Tab = chrome.tabs.Tab;
 import Window = chrome.windows.Window;
 import 'chrome-extension-async'
@@ -26,6 +26,17 @@ let contexts: Context[] = [{
 let contextIdToWindowIdMapping: ContextWindowMapping = []
 //this is for the popup to present the windows/ contexts the the order they have been switched to by the user
 let windowIdFocusOrder: number[] = []
+
+function windowIdContextIdMapping(): WindowContextMapping {
+     // @ts-ignore
+    return pipe(
+      invertObj,
+      toPairs,
+      curry(map(([k, v]) => [k, parseInt(v, 10)])),
+      fromPairs as any
+    )(contextIdToWindowIdMapping)
+}
+
 //maybe window state could have a pointer to the actual context... the context can change independantly of this data, its better to think of them relationally
 
 
@@ -33,7 +44,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   const msgType: MessageRequestType = message.type
   if (msgType === 'RequestPopupState') {
-    sendResponse(createPopupState(windowIdFocusOrder, contextIdToWindowIdMapping, contexts))
+    sendResponse(createPopupState(windowIdFocusOrder, windowIdContextIdMapping(), contexts))
   } else {
     console.log(`Unknown message from sender ${sender.id} `, message)
   }
@@ -96,7 +107,6 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
   windowIdFocusOrder = uniq(prepend(windowId, windowIdFocusOrder))
   console.log(`new windows focused`, windowIdFocusOrder)
 })
-
 
 async function createWindowWithTab(contextId: number, tabId: number): Promise<void> {
 
