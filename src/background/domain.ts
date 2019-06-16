@@ -18,7 +18,7 @@ import {
   partial,
   head,
   tap,
-  last, propOr, find, propEq, or, defaultTo, invertObj
+  last, propOr, find, propEq, or, defaultTo, invertObj, tail
 } from "ramda";
 import {Context, ContextWindowMapping, PopUpItem, WindowContextMapping} from "./model";
 import {pipeline} from "stream";
@@ -63,7 +63,7 @@ export const contextForUri = (url: string, contexts: Context[]): Context | null 
 }
 
 export const createPopupState = (windowFocusOrder: number[], windowContextMapping: WindowContextMapping, contexts: Context[]): PopUpItem[] => {
-  return map(windowId => {
+  const mapped =  map(windowId => {
 
     const contextId = prop(windowId, windowContextMapping)
     const context = find(propEq('id', contextId), contexts)
@@ -74,5 +74,7 @@ export const createPopupState = (windowFocusOrder: number[], windowContextMappin
       name: withDefault(prop('name',context))
     }
   }, windowFocusOrder)
+
+  return tail(mapped) //drop first element as its the current window
 
 }

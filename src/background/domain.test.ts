@@ -101,7 +101,7 @@ test("returns null when no contexts match", () => {
 
 test('popup state', () => {
 
-  const orderedWindowId = [1, 3]
+  const orderedWindowId = [0, 1, 3]
   const windowContextMapping = {
     1: 100,
   }
