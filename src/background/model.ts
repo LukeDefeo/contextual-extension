@@ -5,3 +5,11 @@ export interface Context {
   rules: string[][]
   //each rule is a list of conditions which is just a part of a url to match against
 }
+
+export interface PopUpItem {
+  windowId: number
+  name: string
+}
+
+export type ContextWindowMapping = { [contextId: number]: number }
+export type WindowContextMapping = { [contextId: number]: number }

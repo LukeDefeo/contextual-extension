@@ -1,5 +1,5 @@
 import {assoc, assocPath, contains, evolve, update} from "ramda";
-import {contextForUri, doesUrlMatchContext, doesUrlMatchRule} from "./domain";
+import {contextForUri, createPopupState, doesUrlMatchContext, doesUrlMatchRule} from "./domain";
 
 test('doesUrlMatchRule works with single condition matching', () => {
   const url = "http://bbc.co.uk/news"
@@ -96,5 +96,31 @@ test("returns null when no contexts match", () => {
       "rules": [["new-relic"], ["stack driver"]]
     }]
   expect(contextForUri(url, ctxs)).toEqual(null)
+})
+
+
+test('popup state', () => {
+
+  const orderedWindowId = [1, 3]
+  const windowContextMapping = {
+    1: 100,
+  }
+
+  const contexts = [{
+    id: 100,
+    name: "Name",
+    rules: []
+  }]
+  const state = createPopupState(orderedWindowId,windowContextMapping, contexts)
+
+  expect(state).toEqual([{
+      windowId: 1,
+      name: "Name"
+    },{
+      windowId: 3,
+      name: "Unmanaged"
+    }])
+
+
 })
 

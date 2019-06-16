@@ -1,4 +1,4 @@
-import {Context} from "./model";
+import {Context, ContextWindowMapping} from "./model";
 import {append, assoc, curry, equals, invertObj, map, partial, prepend, uniq} from "ramda";
 import Tab = chrome.tabs.Tab;
 import Window = chrome.windows.Window;
@@ -23,7 +23,7 @@ let contexts: Context[] = [{
 
 //these values are mutated
 
-let contextIdToWindowIdMapping: { [contextId: number]: number } = []
+let contextIdToWindowIdMapping: ContextWindowMapping = []
 //this is for the popup to present the windows/ contexts the the order they have been switched to by the user
 let windowIdFocusOrder: number[] = []
 //maybe window state could have a pointer to the actual context... the context can change independantly of this data, its better to think of them relationally
@@ -74,6 +74,8 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
   windowIdFocusOrder = uniq(prepend(windowId, windowIdFocusOrder))
   console.log(`new windows focused`, windowIdFocusOrder)
 })
+
+
 
 async function createWindowWithTab(contextId: number, tabId: number): Promise<void> {
 

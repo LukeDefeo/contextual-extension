@@ -18,9 +18,9 @@ import {
   partial,
   head,
   tap,
-  last
+  last, propOr, find, propEq, or, defaultTo
 } from "ramda";
-import {Context} from "./model";
+import {Context, PopUpItem, WindowContextMapping} from "./model";
 import {pipeline} from "stream";
 import {isNullOrUndefined} from "util";
 
@@ -51,13 +51,28 @@ export const doesUrlMatchContext: (url: string, context: Context) => number | nu
  * @param url
  * @param contexts
  */
-export const contextForUri = (url: string, contexts: Context[]) : Context | null => {
+export const contextForUri = (url: string, contexts: Context[]): Context | null => {
 
   return pipe(
     map((ctx: any) => [doesUrlMatchContext(url, ctx), ctx]),
-    filter(([conditionCount,_ ]) => conditionCount !== null),
+    filter(([conditionCount, _]) => conditionCount !== null),
     head,
     res => res ? last(res) : null
   )(contexts) as Context | null
+
+}
+
+export const createPopupState = (windowFocusOrder: number[], windowContextMapping: WindowContextMapping, contexts: Context[]): PopUpItem[] => {
+  return map(windowId => {
+
+    const contextId = prop(windowId, windowContextMapping)
+    const context = find(propEq('id', contextId), contexts)
+    const withDefault = defaultTo('Unmanaged')
+
+    return {
+      windowId: windowId,
+      name: withDefault(prop('name',context))
+    }
+  }, windowFocusOrder)
 
 }
