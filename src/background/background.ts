@@ -19,7 +19,7 @@ let contexts: Context[] = [{
   rules: [["new-relic"], ["stack driver"]]
 }]
 
-let windowState: { [windowId: number]: number } = []
+let contextIdToWindowIdMapping: { [contextId: number]: number } = []
 //maybe window state could have a pointer to the actual context?
 
 
@@ -49,13 +49,11 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 
 chrome.windows.onRemoved.addListener((windowId) => {
   console.log(`window ${windowId} closed`)
+
 })
 
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
-  // console.log(`window ${windowId} focused`)
-  // await testAsync("foo")
-  // console.log(`window ${windowId} focused`)
-  // await testAsync("bar")
+
 })
 
 
@@ -73,14 +71,14 @@ async function createWindowWithTab(contextId: number, tabId: number): Promise<vo
   const window: Window = await chrome.windows.create({
     tabId: tabId
   })
-  windowState[window.id] = contextId
+  contextIdToWindowIdMapping[contextId] = window.id
 
   console.log(`created window ${window.id} for context ${contextId}`)
-  console.log(`new window state`, windowState)
+  console.log(`new window state`, contextIdToWindowIdMapping)
 }
 
 async function windowForContextId(contextId: number): Promise<Window> {
-  const windowId = windowState[contextId]
+  const windowId = contextIdToWindowIdMapping[contextId]
   if (windowId) {
     return await chrome.windows.get(windowId,{})
   } else {
@@ -108,31 +106,9 @@ async function moveTabToContext(tab: Tab, contextId: number) {
   }
 }
 
-/**
+/*
 
- (defn <move-tab-to-context! [{:keys [url id windowId] :as tab} context-id]
- (go
- (let [dest-window (<! (<context-id->window context-id))]
- (cond
- (nil? dest-window) (<! (<create-window-with-tab context-id id))
- ;We use the tabs current window rather than the users current window since tabs
- ;can get refreshed when they are in the background in the case of google mail notifications
- (= windowId (:id dest-window)) (println "window already in correct context new")
- :else
- (do
- (println "tab with " url "will be moved to " (:id dest-window))
- (<! (tabs/move id (clj->js {:windowId (:id dest-window) :index -1})))
- (<! (tabs/update id (clj->js {:active true}))))))))
-
-
- (defn process-updated-tab! [[_ _ event]]
- (go
- (let [{:keys [url] :as event} (js->clj-keyed event)
- context-id (url->context-id url @*contexts)]
- (when context-id
- (<! (<move-tab-to-context! event context-id))))))
-
- (defn window-id->context-id [window-id]
+   defn window-id->context-id [window-id]
  (get (set/map-invert @*context->window-state) window-id))
 
  (defn handle-window-focused! [window-id]
