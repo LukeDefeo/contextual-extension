@@ -16,5 +16,3 @@ export type WindowContextMapping = { [contextId: number]: number }
 
 
 export type MessageRequestType = 'RequestPopupState'
-
-// export type MessageType = 'RequestPopupState' | 'SendPopupState'
