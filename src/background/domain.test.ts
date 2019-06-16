@@ -1,5 +1,5 @@
 import {assoc, assocPath, contains, evolve, update} from "ramda";
-import {contextForUri, doesUrlMatchContext, doesUrlMatchRule} from "./tabManager";
+import {contextForUri, doesUrlMatchContext, doesUrlMatchRule} from "./domain";
 
 test('doesUrlMatchRule works with single condition matching', () => {
   const url = "http://bbc.co.uk/news"
@@ -75,5 +75,26 @@ test("contextForUri returns context which matches", () => {
       ["bla"]
     ]
   }, matchingOne]
-  expect(contextForUri(url,contexts)).toEqual(matchingOne)
+  expect(contextForUri(url, contexts)).toEqual(matchingOne)
 })
+
+
+test("returns null when no contexts match", () => {
+  const url = "not.com"
+
+  const ctxs = [
+    {
+      "id": 12312,
+      "name": "News2",
+      "rules": [
+        ["bbc.co.uk/sport", "sport", "sport"],
+        ["facebook.com", "messages"]]
+    },
+    {
+      "id": 552,
+      "name": "monitoring",
+      "rules": [["new-relic"], ["stack driver"]]
+    }]
+  expect(contextForUri(url, ctxs)).toEqual(null)
+})
+

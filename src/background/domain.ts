@@ -8,10 +8,12 @@ import {
   startsWith,
   length,
   sort,
+  either,
   pipe,
   map,
   maxBy,
   max,
+  always,
   reduce,
   partial,
   head,
@@ -55,7 +57,7 @@ export const contextForUri = (url: string, contexts: Context[]) : Context | null
     map((ctx: any) => [doesUrlMatchContext(url, ctx), ctx]),
     filter(([conditionCount,_ ]) => conditionCount !== null),
     head,
-    last
+    res => res ? last(res) : null
   )(contexts) as Context | null
 
 }
