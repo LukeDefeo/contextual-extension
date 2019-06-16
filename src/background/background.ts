@@ -1,5 +1,5 @@
 import {Context} from "./model";
-import {curry, map, partial} from "ramda";
+import {curry, invertObj, map, partial} from "ramda";
 import Tab = chrome.tabs.Tab;
 import Window = chrome.windows.Window;
 import  'chrome-extension-async'
@@ -15,8 +15,8 @@ let contexts: Context[] = [{
   rules: [["bbc.co.uk/sport", "sport", "sport"], ["facebook.com", "messages"]]
 }, {
   id: 552,
-  name: "monitoring",
-  rules: [["new-relic"], ["stack driver"]]
+  name: "Play",
+  rules: [["reddit.com"], ["stack driver"]]
 }]
 
 let contextIdToWindowIdMapping: { [contextId: number]: number } = []
@@ -37,19 +37,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
-  console.log(`fTab ${tabId} changed  `, tab)
-  console.log("contexts", JSON.stringify(contexts))
-  console.log("url", tab.url)
+  // console.log(`tab ${tabId} updated`, tab)
+  // console.log("contexts", JSON.stringify(contexts))
+  // console.log("url", tab.url)
 
   const context = contextForUri(tab.url, contexts)
   if (context) {
-    await moveTabToContext(tab,context.id)
+    if (info.status === 'loading') {
+      console.log('tab is "loading" ... not moving')
+    } else {
+      await moveTabToContext(tab,context.id)
+    }
   }
 })
 
 chrome.windows.onRemoved.addListener((windowId) => {
-  console.log(`window ${windowId} closed`)
 
+  const windowIdToContextIdMapping = invertObj(contextIdToWindowIdMapping)
+  const contextId = windowIdToContextIdMapping[windowId]
+  console.log(`window ${windowId} closed, dissoc'ing context ${contextId}`)
+  delete contextIdToWindowIdMapping[contextId]
 })
 
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
@@ -89,20 +96,24 @@ async function windowForContextId(contextId: number): Promise<Window> {
 
 async function moveTabToContext(tab: Tab, contextId: number) {
   const destWindow = await windowForContextId(contextId)
-  console.log(`dest window `, destWindow)
   if (destWindow === null) {
+    console.log(`No window for ${contextId} ... creating with tab ${tab.id}`, destWindow)
     await createWindowWithTab(contextId, tab.id)
   } else if (tab.windowId === destWindow.id) {
-    //window already in corr`ect tab
+    console.log(`${tab.id} already in the correct context`)
   } else {
     console.log(`tab with url ${tab.url} will be moved to window ${destWindow.id} context ${contextId}`)
     await chrome.tabs.move(tab.id, {
       index: -1,
       windowId: destWindow.id
     })
-    // await chrome.tabs.update(tab.id, {
-    //   active: true
-    // })
+    await chrome.tabs.update(tab.id, {
+      active: true
+    })
+
+    await chrome.windows.update(destWindow.id, {
+      focused: true
+    })
   }
 }
 
