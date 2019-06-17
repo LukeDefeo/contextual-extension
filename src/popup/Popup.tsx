@@ -2,7 +2,7 @@ import * as React from 'react';
 import './Popup.scss';
 import {PopUpItem} from "../background/model";
 import * as KeyboardEventHandler from 'react-keyboard-event-handler';
-import {head, tail} from "ramda";
+import {clamp, curry, dec, head, inc, partial, tail} from "ramda";
 
 interface AppProps {
 }
@@ -10,8 +10,11 @@ interface AppProps {
 interface PopupState {
   current?: PopUpItem,
   items: PopUpItem[],
-  cursor: number
+  cursor: number,
+  hoverIdx: number,
 }
+
+type Direction = 'up' | 'down'
 
 export default class Popup extends React.Component<AppProps, PopupState> {
 
@@ -19,7 +22,8 @@ export default class Popup extends React.Component<AppProps, PopupState> {
     super(props)
     this.state = {
       cursor: 0,
-      items: []
+      items: [],
+      hoverIdx: -1
     }
   }
 
@@ -29,16 +33,27 @@ export default class Popup extends React.Component<AppProps, PopupState> {
     chrome.windows.update(selectedItem.windowId, {
       focused: true
     })
+    window.close()
+  }
+
+  nextCursor = (cursor: number, nItems: number, direction: Direction) => {
+
+    const fn = direction === 'down' ? inc : dec
+    const clamper = clamp(0, nItems - 1)
+
+    return clamper(fn(cursor))
   }
 
   handleKey = (key) => {
+
+    //todo wrap around cycling behaviour
     if (key === 'up') {
       this.setState(prevState => ({
-        cursor: prevState.cursor - 1
+        cursor: this.nextCursor(prevState.cursor, prevState.items.length, 'up')
       }))
     } else if (key === 'down') {
       this.setState(prevState => ({
-        cursor: prevState.cursor + 1
+        cursor: this.nextCursor(prevState.cursor, prevState.items.length, 'down')
       }))
     } else if (key === 'enter' && this.state.items.length > 0) {
       this.focus(this.state.cursor)
@@ -50,7 +65,7 @@ export default class Popup extends React.Component<AppProps, PopupState> {
     return (
 
       <div
-      style={{width: 200}}>
+        style={{width: 200}}>
         <div>
           current name {this.state.current && this.state.current.name} id {this.state.current && this.state.current.windowId}
         </div>
@@ -58,9 +73,19 @@ export default class Popup extends React.Component<AppProps, PopupState> {
         <div>
           {this.state.items.map((item, i) => (
             <div
-              onClick={this.focus.bind(this,i)}
+              onMouseOver={(e) => {
+                this.setState({
+                  hoverIdx: i
+                })
+              }}
+              onMouseLeave={() => {
+                this.setState({
+                  hoverIdx: -1
+                })
+              }}
+              onClick={partial(this.focus, [i])}
               key={item.windowId}
-              style={{backgroundColor: i == cursor ? "green" : "blue"}}>
+              style={{backgroundColor: i == this.state.hoverIdx ? "green" : "blue"}}>
               <span>{item.name} {item.windowId}</span>
             </div>))}
         </div>
