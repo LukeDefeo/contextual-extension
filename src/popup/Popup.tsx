@@ -84,6 +84,7 @@ export default class Popup extends React.Component<AppProps, PopupState> {
 
       <div
         style={{width: 200}}>
+        <a href="/rules.html" target="_blank">Rules</a>
         <div>
           current name {current && current.name} id {current && current.windowId}
           <button onClick={this.cleanContextKill}>
