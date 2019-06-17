@@ -101,7 +101,7 @@ test("returns null when no contexts match", () => {
 
 test('popup state', () => {
 
-  const orderedWindowId = [0, 1, 3]
+  const orderedWindowId = [1, 3, -1] //-1 is dropped
   const windowContextMapping = {
     1: 100,
   }
@@ -111,15 +111,15 @@ test('popup state', () => {
     name: "Name",
     rules: []
   }]
-  const state = createPopupState(orderedWindowId,windowContextMapping, contexts)
+  const state = createPopupState(orderedWindowId, windowContextMapping, contexts)
 
   expect(state).toEqual([{
-      windowId: 1,
-      name: "Name"
-    },{
-      windowId: 3,
-      name: "Unmanaged"
-    }])
+    windowId: 1,
+    name: "Name"
+  }, {
+    windowId: 3,
+    name: "Unmanaged"
+  }])
 
 
 })

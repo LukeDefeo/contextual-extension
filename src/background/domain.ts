@@ -1,33 +1,30 @@
 import {
   all,
   contains,
-  curry,
+  defaultTo,
   filter,
+  find,
   flip,
-  prop,
-  startsWith,
-  length,
-  sort,
-  either,
-  pipe,
-  map,
-  maxBy,
-  max,
-  always,
-  reduce,
-  partial,
   head,
-  tap,
-  last, propOr, find, propEq, or, defaultTo, invertObj, tail
+  last,
+  length,
+  map,
+  max,
+  partial,
+  pipe,
+  prop,
+  propEq,
+  reduce,
+  reject
 } from "ramda";
-import {Context, ContextWindowMapping, PopUpItem, WindowContextMapping} from "./model";
-import {pipeline} from "stream";
-import {isNullOrUndefined} from "util";
+import {Context, PopUpItem, WindowContextMapping} from "./model";
+import {threadLast} from "./thread";
 
 /**
  * in order for a url to match a rule every condition must be substring of the url
  */
 const containsStr = flip(contains);
+
 export const doesUrlMatchRule = (url: string, rule: string[]): boolean => {
   return all(containsStr(url), rule)
 }
@@ -37,13 +34,12 @@ export const doesUrlMatchRule = (url: string, rule: string[]): boolean => {
  * or null. If multiple rules match returns the greater number
  */
 export const doesUrlMatchContext: (url: string, context: Context) => number | null = (url: string, context: Context) => {
-  // @ts-ignore-start
+  // @ts-ignore
   return pipe(
     filter(partial(doesUrlMatchRule, [url])),
     map(length),
     partial(reduce, [max, null]),
   )(context.rules)
-  // @ts-ignore-end
 }
 
 /*
@@ -62,19 +58,22 @@ export const contextForUri = (url: string, contexts: Context[]): Context | null 
 
 }
 
+
 export const createPopupState = (windowFocusOrder: number[], windowContextMapping: WindowContextMapping, contexts: Context[]): PopUpItem[] => {
-  const mapped =  map(windowId => {
 
-    const contextId = prop(windowId, windowContextMapping)
-    const context = find(propEq('id', contextId), contexts)
-    const withDefault = defaultTo('Unmanaged')
+  return threadLast(
+    windowFocusOrder,
+    reject(id => id === -1),
+    map((windowId: number) => {
 
-    return {
-      windowId: windowId,
-      name: withDefault(prop('name',context))
-    }
-  }, windowFocusOrder)
+      const contextId = prop(windowId, windowContextMapping)
+      const context = find(propEq('id', contextId), contexts)
+      const withDefault = defaultTo('Unmanaged')
 
-  return tail(mapped) //drop first element as its the current window
-
+      return {
+        windowId: windowId,
+        name: withDefault(prop('name', context))
+      }
+    }),
+  )
 }
