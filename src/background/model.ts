@@ -15,4 +15,4 @@ export type ContextWindowMapping = { [contextId: number]: number }
 export type WindowContextMapping = { [contextId: number]: number }
 
 
-export type MessageRequestType = 'RequestPopupState'
+export type MessageRequestType = 'RequestPopupState' | 'CleanContextKillCommand'

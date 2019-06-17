@@ -2,7 +2,7 @@ import * as React from 'react';
 import './Popup.scss';
 import {PopUpItem} from "../background/model";
 import * as KeyboardEventHandler from 'react-keyboard-event-handler';
-import {clamp, curry, dec, head, inc, partial, tail} from "ramda";
+import {clamp, dec, head, inc, partial, tail} from "ramda";
 
 interface AppProps {
 }
@@ -25,6 +25,24 @@ export default class Popup extends React.Component<AppProps, PopupState> {
       items: [],
       hoverIdx: -1
     }
+  }
+
+  componentDidMount() {
+    chrome.runtime.sendMessage({type: 'RequestPopupState'}, (response: PopUpItem[]) => {
+      this.setState({
+        current: head(response),
+        items: tail(response)
+      })
+    })
+  }
+
+  cleanContextKill = () => {
+    console.log('cleaning ...')
+    chrome.runtime.sendMessage({
+      type: 'CleanContextKillCommand',
+      windowId: this.state.current.windowId
+    })
+    window.close()
   }
 
   focus = (idx: number) => {
@@ -61,17 +79,20 @@ export default class Popup extends React.Component<AppProps, PopupState> {
   }
 
   render() {
-    const {cursor} = this.state
+    const {items, current, hoverIdx} = this.state;
     return (
 
       <div
         style={{width: 200}}>
         <div>
-          current name {this.state.current && this.state.current.name} id {this.state.current && this.state.current.windowId}
+          current name {current && current.name} id {current && current.windowId}
+          <button onClick={this.cleanContextKill}>
+            Clean ctx kill
+          </button>
         </div>
 
         <div>
-          {this.state.items.map((item, i) => (
+          {items.map((item, i) => (
             <div
               onMouseOver={(e) => {
                 this.setState({
@@ -85,7 +106,7 @@ export default class Popup extends React.Component<AppProps, PopupState> {
               }}
               onClick={partial(this.focus, [i])}
               key={item.windowId}
-              style={{backgroundColor: i == this.state.hoverIdx ? "green" : "blue"}}>
+              style={{backgroundColor: i == hoverIdx ? "green" : "blue"}}>
               <span>{item.name} {item.windowId}</span>
             </div>))}
         </div>
@@ -97,16 +118,6 @@ export default class Popup extends React.Component<AppProps, PopupState> {
     )
   }
 
-
-  componentDidMount() {
-    chrome.runtime.sendMessage({type: 'RequestPopupState'}, (response: PopUpItem[]) => {
-      console.log("got from background", response)
-      this.setState({
-        current: head(response),
-        items: tail(response)
-      })
-    })
-  }
 
   // render() {
   //   return (
