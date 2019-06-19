@@ -58,7 +58,6 @@ export default class Popup extends React.Component<AppProps, PopupState> {
 
     const fn = direction === 'down' ? inc : dec
     const clamper = clamp(0, nItems - 1)
-
     return clamper(fn(cursor))
   }
 
@@ -84,7 +83,11 @@ export default class Popup extends React.Component<AppProps, PopupState> {
 
       <div
         style={{width: 200}}>
-        <a href="/rules.html" target="_blank">Rules</a>
+        <a
+          href="/rules.html"
+          target="_blank">
+          Rules
+        </a>
         <div>
           current name {current && current.name} id {current && current.windowId}
           <button onClick={this.cleanContextKill}>
@@ -118,14 +121,4 @@ export default class Popup extends React.Component<AppProps, PopupState> {
       </div>
     )
   }
-
-
-  // render() {
-  //   return (
-  //     <div className="popupContainer">
-  //       Hello world
-  //       ${JSON.stringify(this.state.items)}
-  //     </div>
-  //   )
-  // }
 }

@@ -1,5 +1,22 @@
 import {Context, ContextWindowMapping, MessageRequestType, WindowContextMapping} from "./model";
-import {append, assoc, curry, equals, filter, find, fromPairs, invertObj, map, partial, pipe, prepend, prop, toPairs, uniq} from "ramda";
+import {
+  append,
+  assoc,
+  cond,
+  curry,
+  equals,
+  filter,
+  find,
+  fromPairs,
+  invertObj,
+  map,
+  partial,
+  pipe,
+  prepend,
+  prop,
+  toPairs,
+  uniq
+} from "ramda";
 import Tab = chrome.tabs.Tab;
 import Window = chrome.windows.Window;
 import 'chrome-extension-async'
@@ -12,15 +29,41 @@ import {threadLast} from "./thread";
 
 console.log(`Back ground page initialised ${new Date().toISOString()}`)
 
-let contexts: Context[] = [{
-  id: 12312,
-  name: "News2",
-  rules: [["bbc.co.uk/sport", "sport", "sport"], ["facebook.com", "messages"]]
-}, {
-  id: 552,
-  name: "Play",
-  rules: [["reddit.com"], ["stack driver"]]
-}]
+let contexts: Context[] = [
+  {
+    id: 123,
+    name: "Prod",
+    rules: [
+      ["console.cloud.google.com", "project=just-data", "blah"]
+    ]
+  }, {
+    id: 1234,
+    name: "QA",
+    rules: [
+      ["console.cloud.google.com", "project=justeat-datalake"]
+    ]
+  }, {
+    id: 1236,
+    name: "Dev",
+    rules: [
+      ["console.cloud.google.com", "project=just-data-sandbox"]
+    ]
+  }, {
+    id: 12312,
+    name: "News",
+    rules: [["bbc.co.uk/sport", "sport", "sport"], ["facebook.com", "messages"]]
+  }, {
+    id: 552,
+    name: "Play",
+    rules: [["reddit.com"], ["stack driver"]]
+  }]
+
+
+chrome.storage.onChanged.addListener(changes => {
+  contexts = changes['contexts'].newValue
+})
+
+saveContexts(contexts)
 
 //these values are mutated
 let contextIdToWindowIdMapping: ContextWindowMapping = []
@@ -40,6 +83,23 @@ function windowIdContextIdMapping(): WindowContextMapping {
 
 //maybe window state could have a pointer to the actual context... the context can change independantly of this data, its better to think of them relationally
 
+
+chrome.storage.onChanged.addListener(change => {
+  console.log('changes', change)
+})
+
+async function saveContexts(contexts: Context[]): Promise<void> {
+  return await chrome.storage.sync.set({
+    'contexts': contexts
+  })
+}
+
+async function fetchContexts(): Promise<Context[]> {
+  const all = await chrome.storage.sync.get()
+  return all.contexts as Context[]
+}
+
+
 chrome.commands.onCommand.addListener(async (command: string) => {
 
   console.log(`got command ${command}`)
@@ -57,10 +117,15 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     sendResponse(createPopupState(windowIdFocusOrder, windowIdContextIdMapping(), contexts))
   } else if (msgType === 'CleanContextKillCommand') {
     await cleanContextKill(message.windowId)
+  } else if (msgType === 'RequestContexts') {
+    sendResponse(contexts)
+  } else if (msgType === 'SaveContextsCommand') {
+    await saveContexts(message.contexts)
   } else {
     console.log(`Unknown message from sender ${sender.id} `, message)
   }
-});
+})
+
 
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 
@@ -74,6 +139,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
   }
 })
 
+
 chrome.windows.onRemoved.addListener((windowId) => {
 
   // remove from mapping
@@ -84,13 +150,15 @@ chrome.windows.onRemoved.addListener((windowId) => {
 
   //update window id focus order
   windowIdFocusOrder = reject(curry(equals(windowId)), windowIdFocusOrder)
-  console.log(`new windows focused`, windowIdFocusOrder)
+  // console.log(`new windows focused`, windowIdFocusOrder)
 })
+
 
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
   windowIdFocusOrder = uniq(prepend(windowId, windowIdFocusOrder))
   console.log(`new windows focused`, windowIdFocusOrder)
 })
+
 
 async function cleanContextKill(windowId: number) {
   console.log(`clean kill window ${windowId}`)
@@ -109,8 +177,8 @@ async function cleanContextKill(windowId: number) {
       }
     )
   }
-
 }
+
 
 async function createWindowWithTab(contextId: number, tabId: number): Promise<void> {
 
@@ -136,6 +204,7 @@ async function windowForContextId(contextId: number): Promise<Window> {
 
 async function moveTabToContext(tab: Tab, contextId: number) {
   const destWindow = await windowForContextId(contextId)
+
   if (destWindow === null) {
     console.log(`No window for ${contextId} ... creating with tab ${tab.id}`, destWindow)
     await createWindowWithTab(contextId, tab.id)

@@ -1,4 +1,5 @@
 const path = require("path");
+const tsImportPluginFactory = require('ts-import-plugin')
 
 module.exports = {
   entry: {
@@ -15,11 +16,24 @@ module.exports = {
       {
         exclude: /node_modules/,
         test: /\.tsx?$/,
-        use: "ts-loader"
+        loader: 'ts-loader',
+        options: {
+          transpileOnly: true,
+          getCustomTransformers: () => ({
+            before: [tsImportPluginFactory({
+              libraryName: 'antd',
+              libraryDirectory: 'lib',
+              style: 'css'
+            })],
+            compilerOptions: {
+              module: 'es2015'
+            }
+          })
+        }
       },
+
       {
-        exclude: /node_modules/,
-        test: /\.scss$/,
+        test: /\.s?css$/,
         use: [
           {
             loader: "style-loader" // Creates style nodes from JS strings
