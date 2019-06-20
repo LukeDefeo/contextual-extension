@@ -27,7 +27,7 @@ export default class Rules extends React.Component<{}, RulesState> {
   updateStateFromStorage(contexts: Context[]) {
     this.setState((prev) => ({
       contexts: contexts,
-      selectedIdx: (!prev.selectedIdx && contexts.length > 0) ? 0 : prev.selectedIdx
+      selectedIdx: (!prev.selectedIdx && contexts.length > 0) ? contexts.length - 1 : prev.selectedIdx
     }))
   }
 
@@ -55,14 +55,20 @@ export default class Rules extends React.Component<{}, RulesState> {
   }
 
   deleteContext = () => {
-    this.setState(cur => ({
-      contexts: remove(cur.selectedIdx, 1, cur.contexts)
-    }))
+    this.setState(cur => {
+
+      const newContexts = remove(cur.selectedIdx, 1, cur.contexts);
+      return ({
+        contexts: newContexts,
+        selectedIdx: (newContexts.length - 1)
+      });
+    })
   }
 
   newContext = () => {
     this.setState((cur) => ({
-      contexts: append(newContext("New context"), cur.contexts)
+      contexts: append(newContext("New context"), cur.contexts),
+      selectedIdx: cur.contexts.length
     }))
   }
 

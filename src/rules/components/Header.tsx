@@ -3,6 +3,7 @@ import {Dropdown, Icon, Layout, Menu} from "antd";
 import {style} from "typestyle";
 import {center, content, endJustified, flex, horizontal, padding} from 'csstips'
 import {color, px} from "csx";
+import {NestedCSSProperties} from "typestyle/lib/types";
 
 const {Header} = Layout;
 
@@ -13,7 +14,7 @@ export interface HeaderComponentProps {
 
 export function HeaderComponent({newContext, deleteContext}: HeaderComponentProps) {
 
-  const menu = (
+  const overflowDropDownMenu = (
     <Menu
       // onClick={this.click}
     >
@@ -33,7 +34,7 @@ export function HeaderComponent({newContext, deleteContext}: HeaderComponentProp
     <Header className={style(padding(0, 20), horizontal, center)}>
       <span className={style(content, {color: "white"})}> Contextual rule configuration</span>
       <div className={style(horizontal, flex, endJustified)}>
-        <Dropdown overlay={menu}>
+        <Dropdown overlay={overflowDropDownMenu}>
           <Icon className={style(content, iconClass)} type="ellipsis"/>
         </Dropdown>
         <Icon className={style(content, iconClass)} type="plus" onClick={newContext}/>
@@ -43,7 +44,7 @@ export function HeaderComponent({newContext, deleteContext}: HeaderComponentProp
   )
 }
 
-const iconClass = {
+const iconClass: NestedCSSProperties = {
   color: "white",
   fontSize: px(20)
 };
