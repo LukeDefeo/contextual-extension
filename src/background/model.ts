@@ -20,3 +20,11 @@ export type MessageRequestType = 'RequestPopupState' | 'CleanContextKillCommand'
 export interface Database {
   contexts: Context[]
 }
+
+export function newContext(name: string) : Context {
+  return {
+    id: Date.now(),
+    name: name,
+    rules: []
+  }
+}
