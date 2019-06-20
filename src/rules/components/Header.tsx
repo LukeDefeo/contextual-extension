@@ -1,12 +1,10 @@
-import {Context} from "../../background/model";
 import * as React from 'react'
 import {Dropdown, Icon, Layout, Menu} from "antd";
-import {classes, style} from "typestyle";
-import {padding, fillParent, horizontal, center, endJustified, betweenJustified, content, flex, flex1} from 'csstips'
-import {} from "csx";
+import {style} from "typestyle";
+import {center, content, endJustified, flex, horizontal, padding} from 'csstips'
+import {color, px} from "csx";
 
-const {Header, Footer, Sider, Content,} = Layout;
-
+const {Header} = Layout;
 
 export interface HeaderComponentProps {
   newContext: () => void
@@ -30,22 +28,22 @@ export function HeaderComponent({newContext, deleteContext}: HeaderComponentProp
     </Menu>
   );
 
+
   return (
     <Header className={style(padding(0, 20), horizontal, center)}>
-
       <span className={style(content, {color: "white"})}> Contextual rule configuration</span>
-
       <div className={style(horizontal, flex, endJustified)}>
         <Dropdown overlay={menu}>
-          <Icon className={style(content)} type="ellipsis" style={{color: "white", fontSize: '20px'}}/>
+          <Icon className={style(content, iconClass)} type="ellipsis"/>
         </Dropdown>
-        <Icon className={style(content)} type="plus" style={{color: "white", fontSize: '20px'}} onClick={newContext}/>
-        <Icon className={style(content)} type="delete" style={{color: "white", fontSize: '20px'}} onClick={deleteContext}/>
+        <Icon className={style(content, iconClass)} type="plus" onClick={newContext}/>
+        <Icon className={style(content, iconClass)} type="delete" onClick={deleteContext}/>
       </div>
     </Header>
   )
-
 }
 
-
-const compStye = style()
+const iconClass = {
+  color: "white",
+  fontSize: px(20)
+};
