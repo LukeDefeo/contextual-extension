@@ -1,7 +1,9 @@
 import {Context} from "../../background/model";
 import * as React from 'react'
-import {Col, Dropdown, Icon, Layout, Menu, Row} from "antd";
-import {style} from "typestyle";
+import {Dropdown, Icon, Layout, Menu} from "antd";
+import {classes, style} from "typestyle";
+import {padding, fillParent, horizontal, center, endJustified, betweenJustified, content, flex, flex1} from 'csstips'
+import {} from "csx";
 
 const {Header, Footer, Sider, Content,} = Layout;
 
@@ -10,9 +12,6 @@ export interface HeaderComponentProps {
   newContext: () => void
   deleteContext: () => void
 }
-
-
-
 
 export function HeaderComponent({newContext, deleteContext}: HeaderComponentProps) {
 
@@ -32,49 +31,17 @@ export function HeaderComponent({newContext, deleteContext}: HeaderComponentProp
   );
 
   return (
-    <Header color="white" style={{}}>
+    <Header className={style(padding(0, 20), horizontal, center)}>
 
-      <Row type="flex" justify="end">
-        {/*<Col span={1} style={{marginLeft: 10, marginRight: 10}}>*/}
-        {/*  <Button> Delete </Button>*/}
-        {/*</Col>*/}
-        <Col>
-          <Dropdown overlay={menu}>
-            <Icon type="ellipsis" style={{color: "white", fontSize: '20px'}}/>
-            {/*<Button>Dropdown</Button>*/}
-          </Dropdown>
-        </Col>\
-        <Col>
-          <Icon type="plus" style={{color: "white", fontSize: '20px'}} onClick={newContext}/>
-        </Col>
-        <Col>
-          <Icon type="delete" style={{color: "white", fontSize: '20px'}} onClick={deleteContext}/>
-        </Col>
-        {/*<Col span={1} style={{}}>*/}
-        {/*  <Button> New </Button>*/}
+      <span className={style(content, {color: "white"})}> Contextual rule configuration</span>
 
-        {/*  /!*<Dropdown.Button overlay={menu} icon={<Icon type="user" />}>*!/*/}
-        {/*  /!*  Dropdown*!/*/}
-        {/*  /!*</Dropdown.Button>*!/*/}
-        {/*</Col>*/}
-        {/*<Col span={1}>*/}
-        {/*  <Dropdown.Button onClick={this.click} overlay={menu}/>*/}
-
-        {/*</Col>*/}
-
-      </Row>
-      {/*<div style={{*/}
-      {/*  height: "100%",*/}
-      {/*  flex: "auto",*/}
-      {/*  justifyContent: "flex-end",*/}
-      {/*  alignItems: "center",*/}
-      {/*  backgroundColor: "blue",*/}
-      {/*  display: "flex"*/}
-      {/*}}>*/}
-      {/*  <Button> New </Button>*/}
-      {/*  <Button> Delete </Button>*/}
-      {/*</div>*/}
-
+      <div className={style(horizontal, flex, endJustified)}>
+        <Dropdown overlay={menu}>
+          <Icon className={style(content)} type="ellipsis" style={{color: "white", fontSize: '20px'}}/>
+        </Dropdown>
+        <Icon className={style(content)} type="plus" style={{color: "white", fontSize: '20px'}} onClick={newContext}/>
+        <Icon className={style(content)} type="delete" style={{color: "white", fontSize: '20px'}} onClick={deleteContext}/>
+      </div>
     </Header>
   )
 
