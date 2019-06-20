@@ -34,10 +34,13 @@
   "dependencies": {
     "antd": "^3.19.5",
     "chrome-extension-async": "^3.3.2",
+    "csstips": "^0.3.0",
+    "csx": "^9.1.0",
     "ramda": "^0.26.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-keyboard-event-handler": "^1.5.0",
-    "ts-import-plugin": "^1.5.5"
+    "ts-import-plugin": "^1.5.5",
+    "typestyle": "^2.0.2"
   }
 }

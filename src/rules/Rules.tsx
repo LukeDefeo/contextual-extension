@@ -1,27 +1,21 @@
 import * as React from "react";
 import {Context, Database, newContext} from "../background/model";
-import {Button, Col, Dropdown, Icon, Input, Layout, Menu, Radio, Row} from 'antd'
+import {Layout} from 'antd'
 import "chrome-extension-async";
 import {append, remove} from "ramda";
 import {ContextComponent} from "./components/ContextComponent";
 import {SideMenuComponent} from "./components/SideMenu";
-import id = chrome.runtime.id;
 import {HeaderComponent} from "./components/Header";
+import {fillParent} from "csstips";
 
-const {Header, Footer, Sider, Content,} = Layout;
-
-const {SubMenu} = Menu;
-
-//this for config https://www.npmjs.com/package/react-scripts-ts-antd
-interface AppProps {
-}
+const {Sider, Content,} = Layout;
 
 interface RulesState {
   contexts: Context[],
   selectedIdx?: number
 }
 
-export default class Rules extends React.Component<AppProps, RulesState> {
+export default class Rules extends React.Component<{}, RulesState> {
 
   constructor(props) {
     super(props)
@@ -54,7 +48,7 @@ export default class Rules extends React.Component<AppProps, RulesState> {
   //import export
   //disable context
 
-  componentWillUpdate(nextProps: Readonly<AppProps>, nextState: Readonly<RulesState>, nextContext: any): void {
+  componentWillUpdate(nextProps: Readonly<{}>, nextState: Readonly<RulesState>, nextContext: any): void {
 
     console.log("new props", nextProps)
     console.log("new state", nextState)
@@ -77,26 +71,26 @@ export default class Rules extends React.Component<AppProps, RulesState> {
       selectedIdx: idx
     })
   }
+
   render() {
 
     return (
-      <div style={{width: "100%", height: "100%"}}>
-        <Layout style={{width: "100%", height: "100%"}}>
-          <HeaderComponent newContext={this.newContext} deleteContext={this.deleteContext}/>
-          <Layout>
-            <Sider>
-              <SideMenuComponent
-                {...this.state}
-                updateSelectedIdx={this.contextSelected}
-              />
-            </Sider>
-            <Content>
-              {this.state.contexts.length > 0 && <ContextComponent context={this.state.contexts[this.state.selectedIdx]}/>}
-            </Content>
-          </Layout>
+      <Layout style={fillParent}>
+        <HeaderComponent newContext={this.newContext} deleteContext={this.deleteContext}/>
+        <Layout>
+          <Sider>
+            <SideMenuComponent
+              {...this.state}
+              updateSelectedIdx={this.contextSelected}
+            />
+          </Sider>
+          <Content>
+            {this.state.contexts.length > 0 && <ContextComponent context={this.state.contexts[this.state.selectedIdx]}/>}
+          </Content>
         </Layout>
+      </Layout>
 
-      </div>
+
     )
   }
 }
