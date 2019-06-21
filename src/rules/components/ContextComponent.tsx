@@ -1,14 +1,16 @@
 import {Context} from "../../background/model";
 import * as React from 'react'
+import {classes, style} from "typestyle";
 
 export interface ContextComponentProps {
+  className?: string
   context: Context
 }
 
-export function ContextComponent({context}: ContextComponentProps) {
+export function ContextComponent({className, context}: ContextComponentProps) {
 
   return (
-    <div>
+    <div className={classes(className)}>
       {JSON.stringify(context)}
     </div>
   )

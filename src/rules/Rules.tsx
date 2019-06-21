@@ -1,14 +1,12 @@
 import * as React from "react";
 import {Context, Database, newContext} from "../background/model";
-import {Layout} from 'antd'
 import "chrome-extension-async";
-import {append, remove} from "ramda";
+import {append, nth, remove} from "ramda";
 import {ContextComponent} from "./components/ContextComponent";
 import {SideMenuComponent} from "./components/SideMenu";
 import {HeaderComponent} from "./components/Header";
-import {fillParent} from "csstips";
-
-const {Sider, Content,} = Layout;
+import {fillParent, flex, horizontal, vertical} from "csstips";
+import {style} from "typestyle";
 
 interface RulesState {
   contexts: Context[],
@@ -81,22 +79,17 @@ export default class Rules extends React.Component<{}, RulesState> {
   render() {
 
     return (
-      <Layout style={fillParent}>
+      <div className={style(fillParent, vertical)}>
         <HeaderComponent newContext={this.newContext} deleteContext={this.deleteContext}/>
-        <Layout>
-          <Sider>
-            <SideMenuComponent
-              {...this.state}
-              updateSelectedIdx={this.contextSelected}
-            />
-          </Sider>
-          <Content>
-            {this.state.contexts.length > 0 && <ContextComponent context={this.state.contexts[this.state.selectedIdx]}/>}
-          </Content>
-        </Layout>
-      </Layout>
-
-
+        <div className={style(flex, horizontal)}>
+          <SideMenuComponent
+            {...this.state}
+            updateSelectedIdx={this.contextSelected}
+          />
+          <ContextComponent className={style(flex)}  context={nth(this.state.selectedIdx, this.state.contexts)}/>
+        </div>
+      </div>
     )
+
   }
 }
