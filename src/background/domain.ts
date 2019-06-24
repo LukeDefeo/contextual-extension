@@ -72,7 +72,8 @@ export const createPopupState = (windowFocusOrder: number[], windowContextMappin
 
       return {
         windowId: windowId,
-        name: withDefault(prop('name', context))
+        name: withDefault(prop('name', context)),
+        isManaged: context !== undefined
       }
     }),
   )

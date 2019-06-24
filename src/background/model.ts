@@ -8,7 +8,8 @@ export interface Context {
 
 export interface PopUpItem {
   windowId: number
-  name: string
+  name: string,
+  isManaged: boolean
 }
 
 export type ContextWindowMapping = { [contextId: number]: number }

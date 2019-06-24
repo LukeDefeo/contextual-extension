@@ -2,7 +2,10 @@ import * as React from 'react';
 import './Popup.scss';
 import {PopUpItem} from "../background/model";
 import * as KeyboardEventHandler from 'react-keyboard-event-handler';
-import {clamp, dec, head, inc, partial, tail} from "ramda";
+import {clamp, dec, head, inc, partial, prop, tail} from "ramda";
+import {classes, style, stylesheet} from "typestyle";
+import {center, centerJustified, content, flex, horizontal, startJustified, vertical} from "csstips";
+import {Icon, Tooltip} from "antd";
 
 interface AppProps {
 }
@@ -11,7 +14,6 @@ interface PopupState {
   current?: PopUpItem,
   items: PopUpItem[],
   cursor: number,
-  hoverIdx: number,
 }
 
 type Direction = 'up' | 'down'
@@ -23,11 +25,12 @@ export default class Popup extends React.Component<AppProps, PopupState> {
     this.state = {
       cursor: 0,
       items: [],
-      hoverIdx: -1
     }
   }
 
   componentDidMount() {
+
+    //todo if no contexts then open rules automatically?
     chrome.runtime.sendMessage({type: 'RequestPopupState'}, (response: PopUpItem[]) => {
       this.setState({
         current: head(response),
@@ -77,42 +80,62 @@ export default class Popup extends React.Component<AppProps, PopupState> {
     }
   }
 
+  openRules = () => {
+    window.open('/rules.html', "_blank")
+  }
+
   render() {
-    const {items, current, hoverIdx} = this.state;
+    const {items, current} = this.state;
     return (
 
-      <div
-        style={{width: 200}}>
-        <a
-          href="/rules.html"
-          target="_blank">
-          Rules
-        </a>
-        <div>
-          current name {current && current.name} id {current && current.windowId}
-          <button onClick={this.cleanContextKill}>
-            Clean ctx kill
-          </button>
-        </div>
+      <div className={classes(style(vertical), css.container)}
+           style={{width: 300}}>
+        <div className={style(horizontal)}>
+          <span className={style(flex, startJustified)}>{current && current.name}</span>
+          <div className={style(horizontal, content, center)}>
 
-        <div>
-          {items.map((item, i) => (
-            <div
-              onMouseOver={(e) => {
-                this.setState({
-                  hoverIdx: i
-                })
-              }}
-              onMouseLeave={() => {
-                this.setState({
-                  hoverIdx: -1
-                })
-              }}
-              onClick={partial(this.focus, [i])}
-              key={item.windowId}
-              style={{backgroundColor: i == hoverIdx ? "green" : "blue"}}>
-              <span>{item.name} {item.windowId}</span>
-            </div>))}
+            {prop('isManaged', current) && (
+              <Tooltip autoAdjustOverflow={false} title="Remove all tabs not matching this context" placement="bottomRight"
+                       arrowPointAtCenter>
+                <Icon className={css.icon} type="scissor" onClick={this.cleanContextKill}/>
+              </Tooltip>)}
+
+            <Tooltip autoAdjustOverflow={false} align={ {
+              // points: ['tl', 'tr'],        // align top left point of sourceNode with top right point of targetNode
+              // offset: [10, 20],            // the offset sourceNode by 10px in x and 20px in y,
+              // targetOffset: ['30%','40%'], // the offset targetNode by 30% of targetNode width in x and 40% of targetNode height in y,
+              overflow: { adjustX: true, adjustY: true }, // auto adjust position when sourceNode is overflowed
+            }} overlayStyle={{fontSize: 12, verticalAlign: 'center'}} title="Configure contexts"
+                     placement="bottomRight" arrowPointAtCenter>
+              <Icon className={css.icon} type="setting" onClick={this.openRules}/>
+            </Tooltip>
+          </div>
+        </div>
+        <div className={style({
+          width: "100%",
+          height: 1,
+          backgroundColor: "black",
+          marginTop: 4,
+          marginBottom: 8
+        })}/>
+
+        <div className={style(vertical)}>
+          {items.map((item, i) => {
+            const setHighlighted = () => {
+              console.log(`highlighting ${i}`)
+              return this.setState({cursor: i});
+            }
+            return (
+              <div
+                key={item.windowId}
+                className={classes(css.basePopUpItem, i == this.state.cursor && css.highlightedPopupItem)}
+                // onMouseEnter={setHighlighted} //for some reason you neeed both?
+                // onMouseOver={setHighlighted}
+                onMouseMove={setHighlighted}
+                onClick={partial(this.focus, [i])}>
+                <span>{item.name}</span>
+              </div>);
+          })}
         </div>
         <KeyboardEventHandler
           handleKeys={['up', 'down', 'enter']}
@@ -122,3 +145,21 @@ export default class Popup extends React.Component<AppProps, PopupState> {
     )
   }
 }
+
+const css = stylesheet({
+
+  container: {
+    padding: 10
+  },
+  basePopUpItem: {
+
+    backgroundColor: 'white'
+  },
+  highlightedPopupItem: {
+    backgroundColor: '#eee'
+
+  },
+  icon: {
+    marginRight: 10
+  }
+})

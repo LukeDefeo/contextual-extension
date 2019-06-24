@@ -115,10 +115,12 @@ test('popup state', () => {
 
   expect(state).toEqual([{
     windowId: 1,
-    name: "Name"
+    name: "Name",
+    isManaged: true
   }, {
     windowId: 3,
-    name: "Unmanaged"
+    name: "Unmanaged",
+    isManaged: false
   }])
 
 
