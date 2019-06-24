@@ -4,7 +4,7 @@ import {PopUpItem} from "../background/model";
 import * as KeyboardEventHandler from 'react-keyboard-event-handler';
 import {clamp, dec, head, inc, partial, prop, tail} from "ramda";
 import {classes, style, stylesheet} from "typestyle";
-import {center, centerJustified, content, flex, horizontal, startJustified, vertical} from "csstips";
+import {center, content, flex, horizontal, startJustified, vertical} from "csstips";
 import {Icon, Tooltip} from "antd";
 
 interface AppProps {
@@ -95,18 +95,20 @@ export default class Popup extends React.Component<AppProps, PopupState> {
           <div className={style(horizontal, content, center)}>
 
             {prop('isManaged', current) && (
-              <Tooltip autoAdjustOverflow={false} title="Remove all tabs not matching this context" placement="bottomRight"
-                       arrowPointAtCenter>
+              <Tooltip
+                autoAdjustOverflow={false}
+                title="Remove all tabs not matching this context"
+                placement="bottomRight"
+                arrowPointAtCenter>
                 <Icon className={css.icon} type="scissor" onClick={this.cleanContextKill}/>
               </Tooltip>)}
 
-            <Tooltip autoAdjustOverflow={false} align={ {
-              // points: ['tl', 'tr'],        // align top left point of sourceNode with top right point of targetNode
-              // offset: [10, 20],            // the offset sourceNode by 10px in x and 20px in y,
-              // targetOffset: ['30%','40%'], // the offset targetNode by 30% of targetNode width in x and 40% of targetNode height in y,
-              overflow: { adjustX: true, adjustY: true }, // auto adjust position when sourceNode is overflowed
-            }} overlayStyle={{fontSize: 12, verticalAlign: 'center'}} title="Configure contexts"
-                     placement="bottomRight" arrowPointAtCenter>
+            <Tooltip
+              autoAdjustOverflow={false}
+              overlayStyle={{fontSize: 12, verticalAlign: 'center'}}
+              title="Configure contexts"
+              placement="bottomRight"
+              arrowPointAtCenter>
               <Icon className={css.icon} type="setting" onClick={this.openRules}/>
             </Tooltip>
           </div>
@@ -129,8 +131,6 @@ export default class Popup extends React.Component<AppProps, PopupState> {
               <div
                 key={item.windowId}
                 className={classes(css.basePopUpItem, i == this.state.cursor && css.highlightedPopupItem)}
-                // onMouseEnter={setHighlighted} //for some reason you neeed both?
-                // onMouseOver={setHighlighted}
                 onMouseMove={setHighlighted}
                 onClick={partial(this.focus, [i])}>
                 <span>{item.name}</span>
@@ -152,12 +152,10 @@ const css = stylesheet({
     padding: 10
   },
   basePopUpItem: {
-
     backgroundColor: 'white'
   },
   highlightedPopupItem: {
     backgroundColor: '#eee'
-
   },
   icon: {
     marginRight: 10
