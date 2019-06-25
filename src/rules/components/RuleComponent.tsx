@@ -7,17 +7,18 @@ import * as KeyboardEventHandler from 'react-keyboard-event-handler';
 import AutosizeInput from 'react-input-autosize';
 
 export interface RuleComponentProps {
+  ruleIdx: number
   conditions: string[]
   updated: (conditions: string[]) => void
 }
 
-export function RuleComponent({conditions, updated}: RuleComponentProps) {
+export function RuleComponent({conditions, updated, ruleIdx}: RuleComponentProps) {
 
   return <div className={style(content, horizontal)}>
     Rule a
     {conditions.map((condition: string, conditionIdx: number) => {
 
-       return <div className={style(horizontal)}>
+        return <div className={style(horizontal)}>
 
           <KeyboardEventHandler
             className={style(content, horizontal)}
@@ -25,10 +26,12 @@ export function RuleComponent({conditions, updated}: RuleComponentProps) {
             onKeyEvent={() => {
               if (condition === '') {
                 updated(remove(conditionIdx, 1, conditions))
+                document.getElementById(`rule-${ruleIdx}-condition-${conditionIdx - 1}`).focus()
               }
             }
             }>
             <AutosizeInput
+              id={`rule-${ruleIdx}-condition-${conditionIdx}`}
               className={style(content)}
               name="form-field-name"
               placeholder="          "
@@ -42,10 +45,7 @@ export function RuleComponent({conditions, updated}: RuleComponentProps) {
             <Icon
               className={style(content, vertical, centerJustified, addConditionIcon)}
               type="plus"
-              onClick={(e) => {
-                updated(insert(conditionIdx + 1, '', conditions))
-
-              }}/>
+              onClick={() => updated(insert(conditionIdx + 1, '', conditions))}/>
           </KeyboardEventHandler>
 
         </div>
@@ -54,6 +54,7 @@ export function RuleComponent({conditions, updated}: RuleComponentProps) {
   </div>;
 
 }
+
 
 const addConditionIcon = {
   opacity: 0.2,
