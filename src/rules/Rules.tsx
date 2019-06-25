@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Context, Database, newContext} from "../background/model";
 import "chrome-extension-async";
-import {adjust, update, always, append, nth, remove, replace} from "ramda";
+import {append, nth, remove, update} from "ramda";
 import {ContextComponent} from "./components/ContextComponent";
 import {SideMenuComponent} from "./components/SideMenu";
 import {HeaderComponent} from "./components/Header";
@@ -55,16 +55,9 @@ export default class Rules extends React.Component<{}, RulesState> {
     selectedIdx: cur.contexts.length
   }))
 
-  contextUpdated = (context: Context) => this.setState(prev => {
-    console.log("got updated ctx ", context, this.state.selectedIdx)
-
-
-    let contexts = update(prev.selectedIdx, context, prev.contexts);
-    console.log("done?", contexts)
-    return ({
-      contexts: contexts
-    });
-  })
+  contextUpdated = (context: Context) => this.setState(prev => ({
+    contexts: update(prev.selectedIdx, context, prev.contexts)
+  }))
 
   deleteContext = () => this.setState(cur => {
 
