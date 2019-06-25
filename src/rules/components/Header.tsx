@@ -10,6 +10,7 @@ const {Header} = Layout;
 export interface HeaderComponentProps {
   newContext: () => void
   deleteContext: () => void
+  save: () => void
 }
 
 export function HeaderComponent({newContext, deleteContext}: HeaderComponentProps) {
@@ -37,6 +38,7 @@ export function HeaderComponent({newContext, deleteContext}: HeaderComponentProp
         <Dropdown overlay={overflowDropDownMenu}>
           <Icon className={style(content, iconClass)} type="ellipsis"/>
         </Dropdown>
+        <Icon className={style(content, iconClass)} type="save" onClick={newContext}/>
         <Icon className={style(content, iconClass)} type="plus" onClick={newContext}/>
         <Icon className={style(content, iconClass)} type="delete" onClick={deleteContext}/>
       </div>

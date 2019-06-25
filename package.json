@@ -36,6 +36,8 @@
     "chrome-extension-async": "^3.3.2",
     "csstips": "^0.3.0",
     "csx": "^9.1.0",
+    "lens.ts": "^0.5.1",
+    "monocle-ts": "^1.7.2",
     "ramda": "^0.26.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

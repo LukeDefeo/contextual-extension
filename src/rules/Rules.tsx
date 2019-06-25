@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Context, Database, newContext} from "../background/model";
 import "chrome-extension-async";
-import {append, nth, remove} from "ramda";
+import {adjust, update, always, append, nth, remove, replace} from "ramda";
 import {ContextComponent} from "./components/ContextComponent";
 import {SideMenuComponent} from "./components/SideMenu";
 import {HeaderComponent} from "./components/Header";
@@ -22,13 +22,6 @@ export default class Rules extends React.Component<{}, RulesState> {
     }
   }
 
-  updateStateFromStorage(contexts: Context[]) {
-    this.setState((prev) => ({
-      contexts: contexts,
-      selectedIdx: (!prev.selectedIdx && contexts.length > 0) ? contexts.length - 1 : prev.selectedIdx
-    }))
-  }
-
   async componentDidMount(): Promise<void> {
 
     const db: Database = await chrome.storage.sync.get() as any
@@ -44,7 +37,7 @@ export default class Rules extends React.Component<{}, RulesState> {
 
   //todo add help
   //import export
-  //disable context
+  //disable context?
 
   componentWillUpdate(nextProps: Readonly<{}>, nextState: Readonly<RulesState>, nextContext: any): void {
 
@@ -52,41 +45,59 @@ export default class Rules extends React.Component<{}, RulesState> {
     console.log("new state", nextState)
   }
 
-  deleteContext = () => {
-    this.setState(cur => {
+  updateStateFromStorage = (contexts: Context[]) => this.setState((prev) => ({
+    contexts: contexts,
+    selectedIdx: (!prev.selectedIdx && contexts.length > 0) ? contexts.length - 1 : prev.selectedIdx
+  }))
 
-      const newContexts = remove(cur.selectedIdx, 1, cur.contexts);
-      return ({
-        contexts: newContexts,
-        selectedIdx: (newContexts.length - 1)
-      });
-    })
-  }
+  newContext = () => this.setState(cur => ({
+    contexts: append(newContext("New context"), cur.contexts),
+    selectedIdx: cur.contexts.length
+  }))
 
-  newContext = () => {
-    this.setState((cur) => ({
-      contexts: append(newContext("New context"), cur.contexts),
-      selectedIdx: cur.contexts.length
-    }))
-  }
+  contextUpdated = (context: Context) => this.setState(prev => {
+    console.log("got updated ctx ", context, this.state.selectedIdx)
 
-  contextSelected = (idx: number) => {
-    this.setState({
-      selectedIdx: idx
-    })
-  }
+
+    let contexts = update(prev.selectedIdx, context, prev.contexts);
+    console.log("done?", contexts)
+    return ({
+      contexts: contexts
+    });
+  })
+
+  deleteContext = () => this.setState(cur => {
+
+    const newContexts = remove(cur.selectedIdx, 1, cur.contexts);
+    return ({
+      contexts: newContexts,
+      selectedIdx: (newContexts.length - 1)
+    });
+  })
+
+  save = () => chrome.storage.sync.set({
+    contexts: this.state.contexts
+  })
+
+  contextSelected = (idx: number) => this.setState({selectedIdx: idx})
 
   render() {
 
     return (
       <div className={style(fillParent, vertical)}>
-        <HeaderComponent newContext={this.newContext} deleteContext={this.deleteContext}/>
+        <HeaderComponent
+          save={this.save}
+          newContext={this.newContext}
+          deleteContext={this.deleteContext}/>
+
         <div className={style(flex, horizontal)}>
           <SideMenuComponent
             {...this.state}
-            updateSelectedIdx={this.contextSelected}
-          />
-          <ContextComponent className={style(flex)}  context={nth(this.state.selectedIdx, this.state.contexts)}/>
+            updateSelectedIdx={this.contextSelected}/>
+          <ContextComponent
+            className={style(flex)}
+            contextUpdated={this.contextUpdated}
+            context={nth(this.state.selectedIdx, this.state.contexts)}/>
         </div>
       </div>
     )
