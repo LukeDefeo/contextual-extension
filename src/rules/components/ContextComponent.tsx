@@ -6,7 +6,7 @@ import AutosizeInput from 'react-input-autosize';
 import {Button, Icon, Input} from 'antd'
 import {center, centerJustified, content, flex, horizontal, vertical, width} from "csstips";
 import {padding, px} from "csx";
-import {append, assocPath, evolve, forEach, insert, lens, lensPath, ManualLens, merge, over, path, prop, remove, set, update} from "ramda";
+import {append, assocPath, evolve, forEach, insert, lens, lensPath, merge, over, path, prop, remove, set, update} from "ramda";
 import {RuleComponent} from "./RuleComponent";
 
 export interface ContextComponentProps {
@@ -35,9 +35,9 @@ export function ContextComponent({className, context, contextUpdated}: ContextCo
       )}
 
       <div className={style(content)}>
-        <Button className={style(content)} onClick={() => {
-          contextUpdated(assocPath(['rules', context.rules.length], [''], context))
-        }}>
+        <Button
+          onClick={() => contextUpdated(assocPath(['rules', context.rules.length], [''], context))}
+          className={style(content)}>
           New rule
         </Button>
       </div>
