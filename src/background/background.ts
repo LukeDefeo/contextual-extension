@@ -1,4 +1,4 @@
-import {Context, ContextWindowMapping, MessageRequestType, WindowContextMapping} from "./model";
+import {Context, ContextWindowMapping, Database, MessageRequestType, WindowContextMapping} from "./model";
 import {
   append,
   assoc,
@@ -29,7 +29,8 @@ import {threadLast} from "./thread";
 
 console.log(`Back ground page initialised ${new Date().toISOString()}`)
 
-let contexts: Context[] = [
+
+const testContexts = [
   {
     id: 123,
     name: "Prod",
@@ -57,13 +58,19 @@ let contexts: Context[] = [
     name: "Play",
     rules: [["reddit.com"], ["stack driver"]]
   }]
+// saveContexts(contexts)
 
+
+let contexts: Context[] = []
+
+chrome.storage.sync.get((db: Database) => ({
+  contexts: db.contexts
+}))
 
 chrome.storage.onChanged.addListener(changes => {
   contexts = changes['contexts'].newValue
 })
 
-saveContexts(contexts)
 
 //these values are mutated
 let contextIdToWindowIdMapping: ContextWindowMapping = []
