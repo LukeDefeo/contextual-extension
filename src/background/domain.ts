@@ -1,5 +1,5 @@
 import {
-  all,
+  all, chain,
   contains,
   defaultTo,
   filter,
@@ -9,13 +9,13 @@ import {
   last,
   length,
   map,
-  max, none,
+  max, maxBy, none, nth,
   partial,
   pipe,
   prop,
   propEq,
   reduce,
-  reject, tap
+  reject, sortBy, sum, tap
 } from "ramda";
 import {Context, PopUpItem, WindowContextMapping} from "./model";
 import {threadLast} from "./thread";
@@ -36,11 +36,13 @@ export const doesUrlMatchRule = (url: string, conditions: string[]): boolean => 
  */
 export const doesUrlMatchContext: (url: string, context: Context) => number | null = (url: string, context: Context) => {
   // @ts-ignore
-  return pipe(
+
+  return threadLast(
+    context.rules,
     filter(partial(doesUrlMatchRule, [url])),
-    map(length),
-    partial(reduce, [max, null]),
-  )(context.rules)
+    map((x: any) => sum(map(length, x))),
+    reduce(max, null),
+  )
 }
 
 /*
@@ -52,8 +54,9 @@ export const contextForUri = (url: string, contexts: Context[]): Context | null 
 
   return pipe(
     map((ctx: any) => [doesUrlMatchContext(url, ctx), ctx]),
-    filter(([conditionCount, _]) => conditionCount !== null),
-    head,
+    filter(([conditionCount, _]) => conditionCount !== null) as any,
+    tap(r => console.log('with count', r)),
+    reduce(maxBy(head), [0, null]),
     res => res ? last(res) : null
   )(contexts) as Context | null
 

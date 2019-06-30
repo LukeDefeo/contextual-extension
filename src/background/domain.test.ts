@@ -22,20 +22,20 @@ test('doesUrlMatchRule works with one condition matching and one not', () => {
 });
 
 
-test("doesUrlMatchContext with matching context returns rule number with more contexts", () => {
+test("doesUrlMatchContext with matching context returns the number of chars which were used to match", () => {
   const ctx = {
     id: 1,
     name: 'foo',
     rules: [
-      ["bbc.co.uk", "news"],
-      ["bbc.co.uk"]
+      ["bbc.co.uk"],
+      ["bbc.co.uk","news"],
     ]
   }
 
   const url = "http://bbc.co.uk/news"
 
 
-  expect(doesUrlMatchContext(url, ctx)).toEqual(2)
+  expect(doesUrlMatchContext(url, ctx)).toEqual(13)
 })
 
 
@@ -91,6 +91,26 @@ test("contextForUri returns context which matches", () => {
     ]
   }, matchingOne]
   expect(contextForUri(url, contexts)).toEqual(matchingOne)
+})
+
+
+test("contextForUri returns context with more chars that matches", () => {
+  const url = "http://bbc.co.uk/news"
+
+  let moreMatchingOne = {
+    id: 1,
+    name: 'foo',
+    rules: [
+      ["bbc.co.uk", "news"]]
+  }
+  const contexts = [{
+    id: 2,
+    name: 'bar',
+    rules: [
+      ["bbc.co.uk"]
+    ]
+  }, moreMatchingOne]
+  expect(contextForUri(url, contexts)).toEqual(moreMatchingOne)
 })
 
 
