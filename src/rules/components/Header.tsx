@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {useState} from "react";
 
-import {Dropdown, Icon, Layout, Menu, Modal, Input} from "antd";
+import {Dropdown, Icon, Layout, Menu, Modal, Input, Button} from "antd";
 import {style} from "typestyle";
 import {center, content, endJustified, flex, horizontal, padding} from 'csstips'
 import {color, px} from "csx";
@@ -25,7 +25,6 @@ export function HeaderComponent({newContext, deleteContext, save, contexts, upda
 
   const [importVisible, setImportVisible] = useState(false);
   const [importText, setImportText] = useState('');
-
   const [exportVisible, setExportVisible] = useState(false);
 
   const overflowDropDownMenu = (
@@ -48,7 +47,14 @@ export function HeaderComponent({newContext, deleteContext, save, contexts, upda
         title="JSON model"
         visible={exportVisible}
         onCancel={() => setExportVisible(false)}
-        footer={null}>
+        footer={[
+          <Button  title="Copy to clipboard" type="primary" onClick={ async () => {
+            await navigator.clipboard.writeText(JSON.stringify(contexts, null, 2))
+            setExportVisible(false)
+          }}>
+            Copy to clipboard
+          </Button>,
+        ]}>
         <pre>
           {JSON.stringify(contexts, null, 2)}
         </pre>
@@ -63,7 +69,7 @@ export function HeaderComponent({newContext, deleteContext, save, contexts, upda
           updateContexts(parsed)
           setImportVisible(false)
         }}>
-        <TextArea rows={16} value={importText} onChange={(e) => setImportText(e.target.value)}>
+        <TextArea rows={12} value={importText} onChange={(e) => setImportText(e.target.value)}>
         </TextArea>
       </Modal>
       <span className={style(content, {color: "white"})}> Contextual rule configuration</span>
