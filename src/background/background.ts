@@ -64,13 +64,18 @@ const testContexts = [
 
 let contexts: Context[] = []
 
-chrome.storage.sync.get((db: Database) => ({
-  contexts: db.contexts
-}))
+chrome.storage.sync.get((db: Database) => {
+  // console.log("got initial contexts", db)
+  contexts = db.contexts
+})
 
 chrome.storage.onChanged.addListener(changes => {
-  contexts = changes['contexts'].newValue
+  let contexts = changes['contexts'].newValue;
+  // console.log("got updated contexts", contexts)
+
+  contexts = contexts
 })
+
 
 
 //these values are mutated
@@ -117,7 +122,6 @@ chrome.commands.onCommand.addListener(async (command: string) => {
   }
 })
 
-
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
   const msgType: MessageRequestType = message.type
@@ -138,6 +142,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
 
   const context = contextForUri(tab.url, contexts)
+  // console.log(`tab ${tab.url} has context ${prop('name', context)}`, contexts)
   if (context) {
     if (info.status === 'loading') {
       console.log('tab is "loading" ... not moving')
