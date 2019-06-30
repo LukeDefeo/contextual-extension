@@ -55,6 +55,21 @@ test("doesUrlMatchContext with non matching context returns null", () => {
   expect(doesUrlMatchContext(url, ctx)).toEqual(null)
 })
 
+test("doesUrlMatchContext ignores empty string conditions", () => {
+  const ctx = {
+    id: 1,
+    name: 'foo',
+    rules: [
+      ["bbc.co.uk", '', "bar"],
+      [""]
+    ]
+  }
+
+  const url = ""
+
+  expect(doesUrlMatchContext(url, ctx)).toEqual(null)
+})
+
 
 test("contextForUri returns context which matches", () => {
   const url = "http://bbc.co.uk/news"

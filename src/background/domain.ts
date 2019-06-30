@@ -5,17 +5,17 @@ import {
   filter,
   find,
   flip,
-  head,
+  head, isEmpty,
   last,
   length,
   map,
-  max,
+  max, none,
   partial,
   pipe,
   prop,
   propEq,
   reduce,
-  reject
+  reject, tap
 } from "ramda";
 import {Context, PopUpItem, WindowContextMapping} from "./model";
 import {threadLast} from "./thread";
@@ -25,8 +25,9 @@ import {threadLast} from "./thread";
  */
 const containsStr = flip(contains);
 
-export const doesUrlMatchRule = (url: string, rule: string[]): boolean => {
-  return all(containsStr(url), rule)
+export const doesUrlMatchRule = (url: string, conditions: string[]): boolean => {
+  const nonEmptyStringConditions = reject(isEmpty, conditions)
+  return !isEmpty(nonEmptyStringConditions) && all(containsStr(url), nonEmptyStringConditions)
 }
 
 /**
