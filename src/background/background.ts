@@ -29,7 +29,8 @@ import {threadLast} from "./thread";
 
 console.log(`Back ground page initialised ${new Date().toISOString()}`)
 
-
+//feature idea .... only allow one unmanaged context? probably no need
+//could also do a only one page rule for gmail, cal etc
 const testContexts = [
   {
     id: 123,

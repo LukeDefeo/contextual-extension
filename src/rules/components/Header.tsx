@@ -44,6 +44,7 @@ export function HeaderComponent({newContext, deleteContext, save}: HeaderCompone
       </div>
     </Header>
   )
+
 }
 
 const iconClass: NestedCSSProperties = {

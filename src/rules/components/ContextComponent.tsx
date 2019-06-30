@@ -6,7 +6,7 @@ import AutosizeInput from 'react-input-autosize';
 import {Button, Icon, Input} from 'antd'
 import {center, centerJustified, content, flex, horizontal, vertical, width} from "csstips";
 import {padding, px} from "csx";
-import {append, assocPath, evolve, forEach, insert, lens, lensPath, merge, over, path, prop, remove, set, update} from "ramda";
+import {append, assoc, assocPath, evolve, forEach, insert, lens, lensPath, merge, over, path, prop, remove, set, update} from "ramda";
 import {RuleComponent} from "./RuleComponent";
 
 export interface ContextComponentProps {
@@ -20,6 +20,14 @@ export function ContextComponent({className, context, contextUpdated}: ContextCo
 
   return (
     <div className={classes(className, css.container, style(vertical))}>
+
+      <Input
+        value={context.name}
+        onChange={(e) => {
+          contextUpdated(assoc('name', e.target.value, context))
+        }}>
+      </Input>
+
       {context && context.rules.map((conditions: string[], ruleIdx: number) =>
         <RuleComponent ruleIdx={ruleIdx} conditions={conditions} updated={(conditions => {
           if (conditions.length == 0) {
