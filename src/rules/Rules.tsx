@@ -11,6 +11,7 @@ import {style} from "typestyle";
 interface RulesState {
   contexts: Context[],
   selectedIdx?: number
+  exportModalVisible: boolean
 }
 
 export default class Rules extends React.Component<{}, RulesState> {
@@ -18,7 +19,8 @@ export default class Rules extends React.Component<{}, RulesState> {
   constructor(props) {
     super(props)
     this.state = {
-      contexts: []
+      contexts: [],
+      exportModalVisible: false
     }
   }
 
@@ -28,16 +30,15 @@ export default class Rules extends React.Component<{}, RulesState> {
 
     console.log('initial read', db)
 
-    this.updateStateFromStorage(db.contexts)
+    this.applyContextsToState(db.contexts)
 
     chrome.storage.onChanged.addListener(changes => {
       const newStateFromStorage: Context[] = path(['contexts','newValue'], changes)
-      this.updateStateFromStorage(newStateFromStorage)
+      this.applyContextsToState(newStateFromStorage)
     })
   }
 
   //todo add help
-  //import export
   //disable context?
 
   componentWillUpdate(nextProps: Readonly<{}>, nextState: Readonly<RulesState>, nextContext: any): void {
@@ -45,7 +46,7 @@ export default class Rules extends React.Component<{}, RulesState> {
     console.log("new state", nextState)
   }
 
-  updateStateFromStorage = (contexts: Context[]) => this.setState((prev) => ({
+  applyContextsToState = (contexts: Context[]) => this.setState((prev) => ({
     contexts: defaultTo([],contexts),
     selectedIdx: (!prev.selectedIdx &&  length(contexts) > 0) ? contexts.length - 1 : prev.selectedIdx
   }))
@@ -68,6 +69,7 @@ export default class Rules extends React.Component<{}, RulesState> {
     });
   })
 
+
   save = () => chrome.storage.sync.set({
     contexts: this.state.contexts
   })
@@ -78,7 +80,10 @@ export default class Rules extends React.Component<{}, RulesState> {
 
     return (
       <div className={style(fillParent, vertical)}>
+
         <HeaderComponent
+          contexts={this.state.contexts}
+          updateContexts={this.applyContextsToState}
           save={this.save}
           newContext={this.newContext}
           deleteContext={this.deleteContext}/>
