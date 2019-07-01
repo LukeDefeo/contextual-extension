@@ -85,7 +85,7 @@ export default class Popup extends React.Component<AppProps, PopupState> {
   }
 
   render() {
-    const {items, current} = this.state;
+    const {items, current, cursor} = this.state;
     return (
 
       <div className={classes(style(vertical), css.container)}
@@ -130,7 +130,7 @@ export default class Popup extends React.Component<AppProps, PopupState> {
             return (
               <div
                 key={item.windowId}
-                className={classes(css.basePopUpItem, i == this.state.cursor && css.highlightedPopupItem)}
+                className={classes(css.basePopUpItem, i === cursor && css.highlightedPopupItem)}
                 onMouseMove={setHighlighted}
                 onClick={partial(this.focus, [i])}>
                 <span>{item.name}</span>
@@ -155,7 +155,7 @@ const css = stylesheet({
     backgroundColor: 'white'
   },
   highlightedPopupItem: {
-    backgroundColor: '#eee'
+    backgroundColor: 'gray'
   },
   icon: {
     marginRight: 10

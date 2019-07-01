@@ -3,7 +3,7 @@
 
     "name": "Contextual ",
     "description":
-        "A way to manage chrome tabs into contexts",
+        "A way to automatically manage chrome tabs into contexts",
     "version": "1.0.0",
 
     "browser_action": {
